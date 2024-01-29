@@ -1,5 +1,13 @@
 NAME = pipex
 
+DIR_OBJ = obj/
+
+DIR_BONUS_OBJ = obj_bonus/
+
+DIR_SRC = src/
+
+DIR_BONUS = bonus/
+
 LIBFT = libft/libft.a
 
 PRINTF = printf/libftprintf.a
@@ -10,26 +18,43 @@ CFLAGS = -Wall -Wextra -Werror -g
 
 RM = rm -f
 
-SRCS =	pipex.c \
-		find_right_path.c \
-		clear_tab.c \
-		child_process.c \
-		parent_process.c \
-		execute.c
+SRCS =	$(wildcard $(DIR_SRC)*.c)
 
-OBJ = $(SRCS:.c=.o)
+BONUS = $(wildcard $(DIR_BONUS)*.c)
+
+OBJ = $(patsubst $(DIR_SRC)%.c,$(DIR_OBJ)%.o,$(SRCS))
+
+BONUS_OBJ = $(patsubst $(DIR_BONUS)%.c,$(DIR_BONUS_OBJ)%.o,$(BONUS))
 
 $(NAME): $(OBJ)
 		make -C ./printf
 		make -C ./libft
 		$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LIBFT) $(PRINTF)
 
+$(DIR_OBJ):
+	@mkdir -p $(DIR_OBJ)
+
+$(DIR_BONUS_OBJ):
+	@mkdir -p $(DIR_BONUS_OBJ)
+
+$(DIR_OBJ)%.o: $(DIR_SRC)%.c | $(DIR_OBJ)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(DIR_BONUS_OBJ)%.o: $(DIR_BONUS)%.c | $(DIR_BONUS_OBJ)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
 all: $(NAME)
+
+bonus: $(BONUS_OBJ)
+		make -C ./printf
+		make -C ./libft
+		$(CC) $(CFLAGS) -o $(NAME) $(BONUS_OBJ) $(LIBFT) $(PRINTF)
 
 clean:
 		make clean -C libft
 		make clean -C printf
-		$(RM) $(OBJ)
+		rm -rf $(DIR_OBJ)
+		rm -rf $(DIR_BONUS_OBJ)
 
 fclean: clean
 		$(RM) $(NAME)

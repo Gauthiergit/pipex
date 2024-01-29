@@ -12,43 +12,56 @@
 
 #include "libft.h"
 
-static int	len_tab(char const *str, char c)
+static void simple_qt(char const *str, int *i, char c)
 {
-	int	i;
-	int	len;
+	while (str[*i] && str[*i] != c)
+	{
+		if (str[*i] == 39)
+		{
+			(*i)++;
+			while (str[*i] != 39 && str[*i])
+				(*i)++;
+		}
+		(*i)++;
+	}
+}
+
+static int len_tab(char const *str, char c)
+{
+	int i;
+	int len;
 
 	i = 0;
 	len = 0;
 	while (str[i])
 	{
-		if (str[i] != c)
+		if (str[i] == 39)
 		{
-			if (str[i - 1] == 39)
-			{
-				while (str[i] != 39 && str[i])
-					i++;
-			}
-			else
-			{
-				while (str[i] && str[i] != c)
-					i++;
-			}
+			i++;
+			while (str[i] != 39 && str[i])
+				i++;
+			i++;
 			len++;
 		}
-		while (str[i] && (str[i] == c || str[i] == 39))
+		else if (str[i] != c && str[i] != 39)
+		{
+			simple_qt(str, &i, c);
+			len++;
+		}
+		while (str[i] && str[i] == c)
 			i++;
 	}
 	return (len + 1);
 }
 
-static int	len_word(int *index, char const *str, char c)
+static int len_word(int *index, char const *str, char c)
 {
-	int	len;
+	int len;
 
 	len = 0;
 	while ((str[*index] == c) || (str[*index] == 39))
 		(*index)++;
-	if (str[*index - 1] == 39)
+	if (str[*index - 1] == 39 && str[*index - 2] == c)
 	{
 		while (str[*index + len] != 39 && str[*index + len])
 			len++;
@@ -56,16 +69,24 @@ static int	len_word(int *index, char const *str, char c)
 	else
 	{
 		while (str[*index + len] != c && str[*index + len])
+		{
 			len++;
+			if (str[*index + len] == 39)
+			{
+				len++;
+				while (str[*index + len] != 39 && str[*index + len])
+					len++;
+			}
+		}
 	}
 	return (len);
 }
 
-static char	*get_next_word(int *index, char const *str, char c)
+static char *get_next_word(int *index, char const *str, char c)
 {
-	char	*res;
-	int		len;
-	int		i;
+	char *res;
+	int len;
+	int i;
 
 	i = 0;
 	len = len_word(index, str, c);
@@ -82,12 +103,12 @@ static char	*get_next_word(int *index, char const *str, char c)
 	return (res);
 }
 
-char	**ft_split(char const *s, char c)
+char **ft_split(char const *s, char c)
 {
-	char	**res;
-	int		len;
-	int		i;
-	int		j;
+	char **res;
+	int len;
+	int i;
+	int j;
 
 	if (!s)
 		return (NULL);
@@ -110,11 +131,11 @@ char	**ft_split(char const *s, char c)
 /* #include <stdio.h>
 int main(void)
 {
-	char const str[] = "  tripouille  '4  2'  ";
+	char const str[] = "cut -d' ' -f2";
 	char c = ' ';
 	int len = len_tab(str, c);
 	int i = 0;
-	char** res;
+	char **res;
 
 	res = ft_split(str, c);
 

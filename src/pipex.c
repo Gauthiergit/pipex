@@ -3,40 +3,41 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gpeyre <gpeyre@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/12 11:08:08 by gpeyre            #+#    #+#             */
-/*   Updated: 2023/12/12 11:12:27 by gpeyre           ###   ########.fr       */
+/*   Updated: 2024/01/29 11:06:56 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	main(int argc, char **argv, char **env)
+int main(int argc, char **argv, char **env)
 {
-	int		pipe_fd[2];
-	pid_t	child_pid;
+	int pipe_fd[2];
+	pid_t child_pid;
+	t_file files;
 
-	if (argc != 5)
-	{
-		ft_printf("Usage: ./pipex infile command1 command2 outfile\n");
-		exit(-1);
-	}
+	if (argc < 5)
+		print_error(1, errno, "Use: ./pipex file1 cmd1 ..cmdn file2");
+	open_files(&files, argc, argv, 0);
 	if (pipe(pipe_fd) == -1)
-	{
-		perror("pipe");
-		exit(-1);
-	}
+		print_error(0, errno, "pipe");
 	child_pid = fork();
 	if (child_pid == -1)
-	{
-		perror("fork");
-		exit(-1);
-	}
+		print_error(0, errno, "fork");
 	if (child_pid == 0)
-		child_process(pipe_fd, argv, env);
+	{
+		close(pipe_fd[0]);
+		dup2(pipe_fd[1], 1);
+		execute(argv[2], env);
+	}
 	else
-		parent_process(pipe_fd, argv, env);
+	{
+		close(pipe_fd[1]);
+		dup2(pipe_fd[0], 0);
+		execute(argv[argc - 2], env);
+	}
 	return (0);
 }
 
