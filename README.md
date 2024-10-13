@@ -1,0 +1,1 @@
+This project aims to deepen the understanding of two concepts that students are already familiar with at this stage of their progression: redirections and pipes. It serves as an introduction to more advanced UNIX projects that are tackled later in the curriculum.
